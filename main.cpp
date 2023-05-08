@@ -302,57 +302,59 @@ public:
         return result;
     }
 };
+
 int main()
 {
     // Test 1: Check if the constructor that takes an integer sets the value correctly
     InfinitePrecision num1(123456789);
+    cout << "num1.toString() == '123456789'\n" << num1.toString() << "\n";
     assert(num1.toString() == "123456789");
-    cout << num1.state();
 
     // Test 2: Check if the constructor that takes a string sets the value correctly
     InfinitePrecision num2("98765432101234567890");
+    cout << "num2.toString() == '98765432101234567890'\n" << num2.toString() << "\n";
     assert(num2.toString() == "98765432101234567890");
-    cout << num2.state();
+
     // Test 3: Check if the copy constructor creates a new object with the same value
     InfinitePrecision num3(num2);
+    cout << "num3.toString() == '98765432101234567890'\n" << num3.toString() << "\n";
     assert(num3.toString() == num2.toString());
-    cout << num3.state();
 
+ 
     // Test 4: Check if the addition operator works correctly
     InfinitePrecision num4("12345678901234567890");
     InfinitePrecision num5("98765432109876543210");
     num4.add(num5);
+    cout << "num4.toString() == '111111111011111111100'\n" << num4.toString() << "\n";
     assert(num4.toString() == "111111111011111111100");
-    cout << num4.state();
 
     // Test 5: Check if the subtraction operator works correctly
     InfinitePrecision num6("98765432109876543210");
     InfinitePrecision num7("12345678901234567890");
     num6.subtract(num7);
+    cout << "num6.toString() == '86419753208641975320'\n" << num6.toString() << "\n";
     assert(num6.toString() == "86419753208641975320");
-    cout << num6.state();
 
     // Test 6: Check if the multiplication operator works correctly
     InfinitePrecision num8("12345678901234567890");
     InfinitePrecision num9("98765432109876543210");
     num8.multiply(num9);
+    cout << "num8.toString() == '121932631137021795745209395222020572100'\n" << num8.toString() << "\n";
     assert(num8.toString() == "121932631137021795745209395222020572100");
-    cout << num8.state();
 
     // Test 7: Check if the division operator works correctly
     InfinitePrecision num10("98765432109876543210");
     InfinitePrecision num11("12345678901234567890");
     num10.divide(num11);
+    cout << "num10.toString() == '8'\n" << num10.toString() << "\n";
     assert(num10.toString() == "8");
-    cout << num10.state();
-
 
     // Test 8: Check if the modulo operator works correctly
     InfinitePrecision num12("98765432109876543210");
     InfinitePrecision num13("12345678901234567890");
     num12.modulo(num13);
+    cout << "num12.toString() == '1977326720864197530'\n" << num12.toString() << "\n";
     assert(num12.toString() == "1977326720864197530");
-    cout << num12.state();
 
     return 0;
 }
