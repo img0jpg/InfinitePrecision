@@ -51,6 +51,65 @@ public:
         }
     }
 
+    // Overloading Operators +, -, *, /, <, >, <=, >=, ==
+    InfinitePrecision operator +(const InfinitePrecision &other)
+    {
+        InfinitePrecision temp = *this;
+        temp.add(other);
+        return temp;
+    }
+    InfinitePrecision operator -(const InfinitePrecision &other)
+    {
+        InfinitePrecision temp = *this;
+        temp.subtract(other);
+        return temp;
+    }
+    InfinitePrecision operator *(const InfinitePrecision &other)
+    {
+        InfinitePrecision temp = *this;
+        temp.multiply(other);
+        return temp;
+    }
+    InfinitePrecision operator /(const InfinitePrecision &other)
+    {
+        InfinitePrecision temp = *this;
+        temp.divide(other);
+        return temp;
+    }
+    InfinitePrecision operator %(const InfinitePrecision &other)
+    {
+        InfinitePrecision temp = *this;
+        temp.modulo(other);
+        return temp;
+    }
+    bool operator ==(const InfinitePrecision &other)
+    {
+        InfinitePrecision temp = *this;
+        return temp.isEqual(other);
+    }
+    bool operator <(const InfinitePrecision &other)
+    {
+        InfinitePrecision temp = *this;
+        return temp.isLess(other);
+    }
+    bool operator >(const InfinitePrecision &other)
+    {
+        InfinitePrecision temp = *this;
+        return temp.isGreater(other);
+    }
+    bool operator <=(const InfinitePrecision &other)
+    {
+        InfinitePrecision temp = *this;
+        return temp.isLessOrEqual(other);
+    }
+    bool operator >=(const InfinitePrecision &other)
+    {
+        InfinitePrecision temp = *this;
+        return temp.isGreaterOrEqual(other);
+    }
+
+
+
     // Method to add another InfinitePrecision object to this one
     void add(const InfinitePrecision &other)
     {
@@ -127,10 +186,10 @@ public:
         // Perform the multiplication, with carries at each step
         for (int i = digits.size() - 1; i >= 0; i--)
         {
-            long long int carry = 0;
+            int carry = 0;
             for (int j = other.digits.size() - 1; j >= 0; j--)
             {
-                long long int product = digits[i] * other.digits[j] + carry + result[i + j + 1];
+                int product = digits[i] * other.digits[j] + carry + result[i + j + 1];
                 carry = product / 10;
                 result[i + j + 1] = product % 10;
             }
@@ -145,31 +204,7 @@ public:
 
         digits.swap(result);
     }
-    /*{
-       vector<int> result(digits.size() + other.digits.size() - 1, 0);
-        int carry = 0;
-
-        for (int i = digits.size() - 1; i >= 0; i--)
-        {
-            carry = 0;
-            for (int j = other.digits.size() - 1; j >= 0; j--)
-            {
-                int product = digits[i] * other.digits[j] + carry + result[i + j];
-                result[i + j] = product % 10;
-                carry = product / 10;
-            }
-            result[i] += carry;
-        }
-
-        // Remove any leading zeros in the result
-        while (result.size() > 1 && result[0] == 0)
-        {
-            result.erase(result.begin());
-        }
-
-        digits = result;
-
-    }*/
+    
     void divide(const InfinitePrecision &divisor)
     {
         if (divisor.digits.size() == 1 && divisor.digits[0] == 0)
@@ -358,7 +393,8 @@ int main()
     InfinitePrecision num4("12345678901234567890");
     InfinitePrecision num5("98765432109876543210");
     cout << num4.toString() << " + " << num5.toString() << "\n";
-    num4.add(num5);
+    //num4.add(num5); this works - testing operator overloading
+    num4 = (num4 + num5);
     cout << "num4 expected: 111111111011111111100\n"
          << "num4 actual:   " << num4.toString() << "\n";
     assert(num4.toString() == "111111111011111111100");
@@ -367,7 +403,8 @@ int main()
     InfinitePrecision num6("98765432109876543210");
     InfinitePrecision num7("12345678901234567890");
     cout << num6.toString() << " - " << num7.toString() << "\n";
-    num6.subtract(num7);
+    //num6.subtract(num7); this works - testing operator overloading
+    num6 = (num6 - num7);
     cout << "num6 expected: 86419753208641975320\n"
          << "num6 actual:   " << num6.toString() << "\n";
     assert(num6.toString() == "86419753208641975320");
