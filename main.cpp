@@ -2,10 +2,13 @@
 #include <string>
 #include <vector>
 #include <cassert>
+#include <functional>
 #include <algorithm>
 #include <math.h>
 
 using namespace std;
+
+void tests();
 
 class InfinitePrecision
 {
@@ -172,39 +175,36 @@ public:
         }
 
         // Remove any leading zeros
-        while (digits.size() > 1 && digits[0] == 0)
-        {
-            temp.digits.erase(digits.begin());
-        }
+        this->trim();
 
         digits.swap(temp.digits);
     }
 
     void multiply(const InfinitePrecision &other)
     {
-        vector<int> result(digits.size() + other.digits.size() - 1, 0);
+	int vectorIndex;
+        InfinitePrecision result(0);
+	result.digits.resize((digits.size() + other.digits.size() - 1), 0);
+	InfinitePrecision temp(result);
         // Perform the multiplication, with carries at each step
         for (int i = digits.size() - 1; i >= 0; i--)
         {
-            int carry = 0;
             for (int j = other.digits.size() - 1; j >= 0; j--)
             {
-                int product = digits[i] * other.digits[j] + carry + result[i + j + 1];
-                carry = product / 10;
-                result[i + j + 1] = product % 10;
+		vectorIndex = i + j;
+                int product = digits[i] * other.digits[j];
+		temp.addToVector(vectorIndex, product);
             }
-            result[i] += carry;
+	    result = (result + temp);
+	    temp = (temp - temp);
         }
 
         // Remove any leading zeros from the result
-        while (result.size() > 1 && result.front() == 0)
-        {
-            result.erase(result.begin());
-        }
+        result.trim();
 
-        digits.swap(result);
+        digits.swap(result.digits);
     }
-    
+
     void divide(const InfinitePrecision &divisor)
     {
         if (divisor.digits.size() == 1 && divisor.digits[0] == 0)
@@ -220,41 +220,38 @@ public:
             int quotientDigit = 0;
             while (remainder.isGreaterOrEqual(divisor))
             {
-                remainder.subtract(divisor);
+                remainder = (remainder - divisor);
                 quotientDigit++;
             }
-            quotient.digits.insert(quotient.digits.begin(), quotientDigit);
+            quotient.digits.insert(quotient.digits.end(), quotientDigit);
         }
 
         // Remove any leading zeros in the quotient
-        while (quotient.digits.size() > 1 && quotient.digits[0] == 0)
-        {
-            quotient.digits.erase(quotient.digits.begin());
-        }
-
+        quotient.trim();
+	digits.resize(quotient.digits.size());
         digits.swap(quotient.digits);
     }
 
     void modulo(const InfinitePrecision &other)
     {
-        InfinitePrecision quotient(0);
-        InfinitePrecision remainder(0);
-
-        for (int i = digits.size() - 1; i >= 0; i--)
+	if (other.digits.size() == 1 && other.digits[0] == 0)
         {
-            remainder.multiply(10);
-            remainder.add(digits[i]);
-            int x = 0;
-            while (other.isLessOrEqual(remainder))
-            {
-                remainder.subtract(other);
-                x++;
-            }
-            quotient.multiply(10);
-            quotient.add(x);
+            throw invalid_argument("division by zero");
         }
 
-        digits = remainder.digits;
+        InfinitePrecision result(0);
+	InfinitePrecision temp(0);
+	temp.digits.swap(digits);
+	result.digits.swap(digits);
+
+        result = (result - other);
+	temp = (temp / other);
+	result = (result * temp);
+
+	cout << "\ntest\n";
+
+	cout << result.toString();
+        digits = result.digits;
     }
 
     // Method to check if this InfinitePrecision object is equal to another InfinitePrecision object
@@ -356,6 +353,30 @@ public:
         // If this number is equal to or less than the other number, it is less than or equal to it
         return isEqual(other) || isLess(other);
     }
+    // HELPER FUNCTIONS
+
+    // Remove any leading zeros in digits vector
+    void trim()
+    {
+        while (digits.size() > 1 && digits[0] == 0)
+        {
+            digits.erase(digits.begin());
+        }
+    }
+
+
+    // Method to add an int to a specific index and handles carry
+    void addToVector(int index, int adder)
+    {
+        digits[index] += adder;
+        if (digits[index] >= 10)
+        {
+                adder = digits[index];
+                digits[index] %= 10;
+                adder = int(adder / 10);
+                digits[index - 1] += adder;
+        }
+    }
 
     // Method to convert the InfinitePrecision object to a string
     string toString() const
@@ -371,32 +392,40 @@ public:
 
 int main()
 {
-    // Test 1: Check if the constructor that takes an integer sets the value correctly
+	tests();
+
+
+    return 0;
+}
+
+void tests()
+{    // Test 1: Check if the constructor that takes an integer sets the value co>
     InfinitePrecision num1(123456789);
     cout << "num1 expected: 123456789\n"
-         << "num1 actual:   " << num1.toString() << "\n";
+         << "num1 actual:   " << num1.toString() << "\n\n";
     assert(num1.toString() == "123456789");
 
-    // Test 2: Check if the constructor that takes a string sets the value correctly
+    // Test 2: Check if the constructor that takes a string sets the value corr>
     InfinitePrecision num2("98765432101234567890");
     cout << "num2 expected: 98765432101234567890\n"
-         << "num2 actual:   " << num2.toString() << "\n";
+         << "num2 actual:   " << num2.toString() << "\n\n";
     assert(num2.toString() == "98765432101234567890");
 
-    // Test 3: Check if the copy constructor creates a new object with the same value
+    // Test 3: Check if the copy constructor creates a new object with the same>
     InfinitePrecision num3(num2);
     cout << "num3 expected: 98765432101234567890\n"
-         << "num3 actual:   " << num3.toString() << "\n";
+         << "num3 actual:   " << num3.toString() << "\n\n";
     assert(num3.toString() == num2.toString());
 
     // Test 4: Check if the addition operator works correctly
     InfinitePrecision num4("12345678901234567890");
     InfinitePrecision num5("98765432109876543210");
     cout << num4.toString() << " + " << num5.toString() << "\n";
+
     //num4.add(num5); this works - testing operator overloading
     num4 = (num4 + num5);
     cout << "num4 expected: 111111111011111111100\n"
-         << "num4 actual:   " << num4.toString() << "\n";
+         << "num4 actual:   " << num4.toString() << "\n\n";
     assert(num4.toString() == "111111111011111111100");
 
     // Test 5: Check if the subtraction operator works correctly
@@ -406,35 +435,37 @@ int main()
     //num6.subtract(num7); this works - testing operator overloading
     num6 = (num6 - num7);
     cout << "num6 expected: 86419753208641975320\n"
-         << "num6 actual:   " << num6.toString() << "\n";
+         << "num6 actual:   " << num6.toString() << "\n\n";
     assert(num6.toString() == "86419753208641975320");
 
     // Test 6: Check if the multiplication operator works correctly
     InfinitePrecision num8("12345678901234567890");
     InfinitePrecision num9("98765432109876543210");
     cout << num8.toString() << " * " << num9.toString() << "\n";
-    num8.multiply(num9);
-    cout << "num8 expected: 121932631137021795745209395222020572100\n"
-         << "num8 actual:   " << num8.toString() << "\n";
-    assert(num8.toString() == "121932631137021795745209395222020572100");
+    //num8.multiply(num9); this works - testing operator overloading
+    num8 = (num8 * num9);
+    cout << "num8 expected: 1219326311370217952237463801111263526900\n"
+         << "num8 actual:   " << num8.toString() << "\n\n";
+    assert(num8.toString() == "1219326311370217952237463801111263526900");
 
-    // Test 7: Check if the division operator works correctly
+   // Test 7: Check if the division operator works correctly
     InfinitePrecision num10("98765432109876543210");
     InfinitePrecision num11("12345678901234567890");
     cout << num10.toString() << " / " << num11.toString() << "\n";
-    num10.divide(num11);
+    //num10.divide(num11); this works, testing operator overloading
+    num10 = (num10 / num11);
     cout << "num10 expected: 8\n"
-         << "num10 actual:   " << num10.toString() << "\n";
+         << "num10 actual:   " << num10.toString() << "\n\n";
     assert(num10.toString() == "8");
 
     // Test 8: Check if the modulo operator works correctly
     InfinitePrecision num12("98765432109876543210");
     InfinitePrecision num13("12345678901234567890");
-    cout << num12.toString() << " % " << num13.toString() << "\n";
+    cout << num12.toString() << " % " << num13.toString() << "\n\n";
     num12.modulo(num13);
-    cout << "num12 expected: 1977326720864197530\n"
+    cout << "num12 expected: 900000000090\n"
          << "num12 actual:   " << num12.toString() << "\n";
-    assert(num12.toString() == "1977326720864197530");
+    assert(num12.toString() == "900000000090");
 
-    return 0;
+
 }
